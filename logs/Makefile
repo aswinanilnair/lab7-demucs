@@ -1,20 +1,18 @@
 VERSION=v1
-DOCKERUSER=PUT_YOUR_DOCKER_ID_HERE
+DOCKERUSER=aswinanilnair
 
 #
 # You should probably update the docker.io user if you update this
 #
 
 build:
-	docker build -f Dockerfile -t logs  .
+	docker build -f Dockerfile -t $(DOCKERUSER)/demucs-logs:$(VERSION) .
 
 #
-# The following make rule labels the current docker image with the version
-# number specified above and also the "latest" tag. It then pushes it to
-# hub.docker.io
+# The following make rule builds the current code for both amd64 and arm64,
+# labels it with the version number specified above and also the "latest" tag,
+# and pushes it to hub.docker.io
 #
 push:
-	docker tag logs  $(DOCKERUSER)/demucs-logs:$(VERSION)
-	docker push $(DOCKERUSER)/demucs-logs:$(VERSION)
-	docker tag logs  $(DOCKERUSER)/demucs-logs:latest
-	docker push $(DOCKERUSER)/demucs-logs:latest
+	docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile \
+		-t $(DOCKERUSER)/demucs-logs:$(VERSION) -t $(DOCKERUSER)/demucs-logs:latest --push .

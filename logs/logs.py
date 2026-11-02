@@ -12,7 +12,8 @@ import redis
 redisHost = os.getenv("REDIS_HOST") or "localhost"
 redisPort = os.getenv("REDIS_PORT") or 6379
 
-redisClient = redis.StrictRedis(host=redisHost, port=redisPort, db=0)
+## blpop waits indefinitely for messages, so the default socket timeout can't apply
+redisClient = redis.StrictRedis(host=redisHost, port=redisPort, db=0, socket_timeout=None)
 
 while True:
     try:

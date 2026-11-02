@@ -1,7 +1,7 @@
-FROM python:3.6-alpine
+FROM python:3.12-alpine
 LABEL MAINTAINER="PUT YOUR EMAIL HERE"
 
-RUN  pip3 install redis
+RUN  pip3 install redis==8.1.0
 
 WORKDIR /srv
 COPY    logs.py /srv

@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: logs
-        image: dirkcgrunwald/demucs-logs:v9
+        image: aswinanilnair/demucs-logs:v1
+        imagePullPolicy: IfNotPresent
         resources:
           requests:
             cpu: 100m

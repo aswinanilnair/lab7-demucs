@@ -1,10 +1,12 @@
 VERSION=v1
-DOCKERUSER=YOUR_DOCKER_USERNAME_HERE
+DOCKERUSER=aswinanilnair
 
 build:
-	docker build -f Dockerfile -t demucs-worker .
+	docker build -f Dockerfile -t $(DOCKERUSER)/demucs-worker:$(VERSION) .
+
+#
+# GKE nodes are usually amd64, so publish images for both architectures
+#
 push:
-	docker tag demucs-worker $(DOCKERUSER)/demucs-worker:$(VERSION)
-	docker push $(DOCKERUSER)/demucs-worker:$(VERSION)
-	docker tag demucs-worker $(DOCKERUSER)/demucs-worker:latest
-	docker push $(DOCKERUSER)/demucs-worker:latest
+	docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile \
+		-t $(DOCKERUSER)/demucs-worker:$(VERSION) -t $(DOCKERUSER)/demucs-worker:latest --push .

@@ -1,0 +1,89 @@
+#
+# Single-node RustFS object store. Data lives in an emptyDir, so it is lost
+# when the pod is deleted or rescheduled.
+#
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rustfs-credentials
+type: Opaque
+stringData:
+  access-key: "rootuser"
+  secret-key: "rootpass123"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustfs
+spec:
+  selector:
+    matchLabels:
+      app: rustfs
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rustfs
+    spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+      - name: rustfs
+        image: rustfs/rustfs:1.0.4
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+        ports:
+        - containerPort: 9000
+        - containerPort: 9001
+        env:
+        - name: RUSTFS_VOLUMES
+          value: "/data"
+        - name: RUSTFS_ADDRESS
+          value: "0.0.0.0:9000"
+        - name: RUSTFS_CONSOLE_ENABLE
+          value: "true"
+        - name: RUSTFS_CONSOLE_ADDRESS
+          value: "0.0.0.0:9001"
+        - name: RUSTFS_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: rustfs-credentials
+              key: access-key
+        - name: RUSTFS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: rustfs-credentials
+              key: secret-key
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: logs
+          mountPath: /logs
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs
+  labels:
+    app: rustfs
+spec:
+  ports:
+    - name: s3
+      protocol: "TCP"
+      port: 9000
+      targetPort: 9000
+    - name: console
+      protocol: "TCP"
+      port: 9001
+      targetPort: 9001
+  selector:
+    app: rustfs

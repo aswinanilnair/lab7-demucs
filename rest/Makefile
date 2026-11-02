@@ -1,11 +1,12 @@
 VERSION=v1
-DOCKERUSER=YOUR_DOCKER_USERNAME_HERE
+DOCKERUSER=aswinanilnair
 
 build:
-	docker build -f Dockerfile-rest -t demucs-rest .
+	docker build -f Dockerfile-rest -t $(DOCKERUSER)/demucs-rest:$(VERSION) .
 
+#
+# GKE nodes are usually amd64, publishing images for both architectures
+#
 push:
-	docker tag demucs-rest $(DOCKERUSER)/demucs-rest:$(VERSION)
-	docker push $(DOCKERUSER)/demucs-rest:$(VERSION)
-	docker tag demucs-rest $(DOCKERUSER)/demucs-rest:latest
-	docker push $(DOCKERUSER)/demucs-rest:latest
+	docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile-rest \
+		-t $(DOCKERUSER)/demucs-rest:$(VERSION) -t $(DOCKERUSER)/demucs-rest:latest --push .

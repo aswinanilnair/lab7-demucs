@@ -1,0 +1,20 @@
+#
+# Makes the RustFS console public on its own external IP. Anyone who can reach
+# this address can try the RustFS login, and the console port also serves the
+# S3 API.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs-console
+  labels:
+    app: rustfs
+spec:
+  type: LoadBalancer
+  ports:
+    - name: console
+      protocol: "TCP"
+      port: 80
+      targetPort: 9001
+  selector:
+    app: rustfs

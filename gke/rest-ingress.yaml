@@ -1,0 +1,21 @@
+#
+# GKE version of rest/rest-ingress.yaml, using Google's load balancer rather
+# than ingress-nginx. See rest/README.md.
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rest-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rest-service
+            port:
+              number: 5000
